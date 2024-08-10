@@ -9,24 +9,35 @@ import { Button } from '@chakra-ui/react'
 function App() {
 
   const PORT = "5000"
-  const ENDPOINT = "/get_response";
+  const ENDPOINT = "get_response";
   const URL = `http://127.0.0.1:${PORT}/${ENDPOINT}`;
 
+  const [input,setInput] = useState("");
   const [output,setOutput] = useState("");
   const [intraOutput,setIntraOutput] = useState(false);
 
-  function getModelOutput(input) {
+  async function getModelOutput() {
 
-  }
+    console.log(intraOutput)
 
-  function getOutput() {
     if (intraOutput == true) {
       return;
     }
-    setIntraOutput(true)
-    console.log("Received Output!");
-    setOutput("Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book. It has survived not only five centuries, but also the leap into electronic typesetting, remaining essentially unchanged. It was popularised in the 1960s with the release of Letraset sheets containing Lorem Ipsum passages, and more recently with desktop publishing software like Aldus PageMaker including versions of Lorem Ipsum.")
+
+    setIntraOutput(true);
+    let modelOutput = await fetch(URL, {
+      headers: {
+        'Accept': 'application/json',
+        'Content-Type': 'application/json'
+      },
+      method: "POST",
+      body: JSON.stringify({ "input" : input })
+    }).then(res => res.json())
+
+    setOutput(modelOutput);
+    setIntraOutput(false);
   }
+
 
   return (
     <>
@@ -40,8 +51,8 @@ function App() {
       <div className="search-output-container">
 
         <div className="search-button-container">
-          <Input className="search" placeholder="Enter your question here"></Input>
-          <Button onClick={getOutput}>➣</Button>
+          <Input className="search" onChange={(e) => setInput(e.target.value)} placeholder="Enter your question here"></Input>
+          <Button onClick={() => getModelOutput()}>➣</Button>
         </div>
         
 
@@ -49,8 +60,6 @@ function App() {
           <ReactTyped onComplete={() => setIntraOutput(false)} typeSpeed={7} strings={[output]}/>
         </div>
       </div>
-
-      
 
     </div>
     </>
